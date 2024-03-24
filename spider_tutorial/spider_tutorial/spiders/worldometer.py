@@ -20,5 +20,21 @@ class WorldometerSpider(scrapy.Spider):
             # yield scrapy.Request(url = absolute_url)
             
             #relative url
-            yield response.follow(url = link)
+            yield response.follow(url = link, callback=self.parse_country, meta={'country': country_name})
+    
+    def parse_country(self, response):
+        
+        country = response.request.meta['country']
+        rows = response.xpath('(//table[contains(@class, "table")])[1]/tbody/tr')
+        for row in rows:
+            year = row.xpath(".//td[1]/text()").get()
+            population = row.xpath(".//td[2]/strong/text()").get()
+            
+            yield {
+                'country':country,
+                'year': year,
+                'population': population,
+            }
+            
+        
             
